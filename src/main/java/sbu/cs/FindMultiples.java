@@ -1,5 +1,10 @@
 package sbu.cs;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 /*
     In this exercise, you must write a multithreaded program that finds all
     integers in the range [1, n] that are divisible by 3, 5, or 7. Return the
@@ -19,11 +24,30 @@ package sbu.cs;
     Use the tests provided in the test folder to ensure your code works correctly.
  */
 
-public class FindMultiples
-{
+public class FindMultiples {
+    public class Find implements Runnable {
+        private int n;
+        private int interval;
+        private ArrayList<Integer> multiples = new ArrayList<>();
 
-    // TODO create the required multithreading class/classes using your preferred method.
+        public Find(int n, int interval) {
+            this.n = n;
+            this.interval = interval;
+        }
 
+        @Override
+        public void run() {
+            for (int i = 1; i <= interval; i++) {
+                if (i % n == 0) {
+                    multiples.add(i);
+                }
+            }
+        }
+
+        public ArrayList<Integer> getMultiples() {
+            return multiples;
+        }
+    }
 
     /*
     The getSum function should be called at the start of your program.
@@ -31,9 +55,28 @@ public class FindMultiples
     */
     public int getSum(int n) {
         int sum = 0;
-
-        // TODO
-
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+        Find find3 = new Find(3, n);
+        Find find5 = new Find(5, n);
+        Find find7 = new Find(7, n);
+        threadPool.execute(find3);
+        threadPool.execute(find5);
+        threadPool.execute(find7);
+        threadPool.shutdown();
+        try {
+            threadPool.awaitTermination(10000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        find3.multiples.addAll(find5.getMultiples());
+        find3.multiples.addAll(find7.getMultiples());
+        ArrayList<Integer> unique = new ArrayList<>();
+        for (Integer multiple : find3.multiples) {
+            if (!unique.contains(multiple)) {
+                unique.add(multiple);
+                sum += multiple;
+            }
+        }
         return sum;
     }
 

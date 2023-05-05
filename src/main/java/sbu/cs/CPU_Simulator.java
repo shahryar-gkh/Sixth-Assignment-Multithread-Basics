@@ -17,22 +17,27 @@ import java.util.List;
     Use the tests provided in the test folder to ensure your code works correctly.
  */
 
-public class CPU_Simulator
-{
+public class CPU_Simulator {
     public static class Task implements Runnable {
         long processingTime;
         String ID;
         public Task(String ID, long processingTime) {
-        // TODO
+            this.ID = ID;
+            this.processingTime = processingTime;
         }
 
-    /*
-        Simulate running a task by utilizing the sleep method for the duration of
-        the task's processingTime. The processing time is given in milliseconds.
-    */
+        /*
+            Simulate running a task by utilizing the sleep method for the duration of
+            the task's processingTime. The processing time is given in milliseconds.
+        */
         @Override
         public void run() {
-        // TODO
+            try {
+                Thread.sleep(this.processingTime);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -43,12 +48,27 @@ public class CPU_Simulator
     */
     public ArrayList<String> startSimulation(ArrayList<Task> tasks) {
         ArrayList<String> executedTasks = new ArrayList<>();
-
-        // TODO
-
+        int n = tasks.size();
+        for (int i = 0; i < n-1; i++) {
+            int min_idx = i;
+            for (int j = i+1; j < n; j++) {
+                if (tasks.get(j).processingTime < tasks.get(min_idx).processingTime) {
+                    min_idx = j;
+                }
+            }
+            if (min_idx != i) {
+                Task temp = tasks.get(min_idx);
+                tasks.set(min_idx, tasks.get(i));
+                tasks.set(i, temp);
+            }
+        }
+        for (Task task : tasks) {
+            Thread t = new Thread(task);
+            t.start();
+            executedTasks.add(task.ID);
+        }
         return executedTasks;
     }
-
     public static void main(String[] args) {
     }
 }
